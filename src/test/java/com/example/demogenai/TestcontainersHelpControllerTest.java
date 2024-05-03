@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         classes = {
                 ContainersConfiguration.class,
+                IngestionConfiguration.class,
         },
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
@@ -44,10 +45,13 @@ class TestcontainersHelpControllerTest {
     BeanOutputParser<ValidatorAgentResponse> outputParser = new BeanOutputParser<>(ValidatorAgentResponse.class);
 
     @Test
-    void verifySystemInstructions() {
-        var question = "How can I use Testcontainers Ollama in Java?";
-        var answer  = restTemplate.getForObject("/help?message={question}", String.class, question);
+    void contextLoads() {
+    }
 
+    @Test
+    void verifyWhichTestcontainersModulesAreAvailableInJava() {
+        var question = "Which Testcontainers modules are available in Java?";
+        var answer  = restTemplate.getForObject("/help?message={question}", String.class, question);
         var reference  = """
             - Answer must include a brief explanation of Testcontainers
             - Answer must include the available modules in Testcontainers
@@ -55,20 +59,19 @@ class TestcontainersHelpControllerTest {
             - Answer must be less than 5 sentences
             """;
 
-        evaluation(question, answer, reference, "yes");
+        evaluation(question, answer, reference,     "yes");
     }
 
     @Test
-    void verifyFailsToAnswerQuestion() {
+    void verifyHowToUseTestcontainersOllamaInJava() {
         var question = "How can I use Testcontainers Ollama in Java?";
         var answer  = restTemplate.getForObject("/help?message={question}", String.class, question);
-
         var reference  = """
             - Answer must indicate to instantiate an Ollama Container by using OllamaContainer ollama = new OllamaContainer("ollama/ollama:0.1.26")
             - Answer must indicate to use org.testcontainers:ollama:1.19.7
             """;
 
-        evaluation(question, answer, reference, "no");
+        evaluation(question, answer, reference, "yes");
     }
 
     record ValidatorAgentResponse(String response, String reason) {}

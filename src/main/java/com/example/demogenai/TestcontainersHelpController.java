@@ -7,6 +7,7 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.ollama.OllamaChatClient;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,7 +40,10 @@ public class TestcontainersHelpController {
 
     @GetMapping
     public String help(@RequestParam(value = "message", defaultValue = "Help me with Testcontainers") String message) {
-        var docs = this.vectorStore.similaritySearch(SearchRequest.query(message).withTopK(2))
+        var docs = this.vectorStore.similaritySearch(SearchRequest
+                        .query(message)
+                        .withFilterExpression(new FilterExpressionBuilder().eq("language", "java").build())
+                )
                 .stream()
                 .map(Document::getContent)
                 .collect(Collectors.joining(System.lineSeparator()));
