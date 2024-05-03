@@ -1,6 +1,8 @@
 package com.example.demogenai;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -19,11 +21,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
         classes = {
-                TestDemoGenaiApplication.class,
+                ContainersConfiguration.class,
         },
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 class TestcontainersHelpControllerTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(TestcontainersHelpControllerTest.class);
 
     @Value("classpath:/validator-agent/system-prompt.txt")
     private Resource systemPrompt;
@@ -51,12 +55,7 @@ class TestcontainersHelpControllerTest {
             - Answer must be less than 5 sentences
             """;
 
-        var systemMessage = new SystemMessage(this.systemPrompt);
-        var promptTemplate = new PromptTemplate(this.userPrompt);
-        var userMessage = promptTemplate.createMessage(Map.of("question", question, "answer", answer, "reference", reference));
-        var prompt = new Prompt(List.of(systemMessage, userMessage));
-        ValidatorAgentResponse validation = outputParser.parse(this.chatClient.call(prompt).getResult().getOutput().getContent());
-        assertThat(validation.response()).isEqualTo("yes");
+        evaluation(question, answer, reference, "yes");
     }
 
     @Test
@@ -69,14 +68,18 @@ class TestcontainersHelpControllerTest {
             - Answer must indicate to use org.testcontainers:ollama:1.19.7
             """;
 
+        evaluation(question, answer, reference, "no");
+    }
+
+    record ValidatorAgentResponse(String response, String reason) {}
+
+    private void evaluation(String question, String answer, String reference, String expected) {
         var systemMessage = new SystemMessage(this.systemPrompt);
         var promptTemplate = new PromptTemplate(this.userPrompt);
         var userMessage = promptTemplate.createMessage(Map.of("question", question, "answer", answer, "reference", reference));
         var prompt = new Prompt(List.of(systemMessage, userMessage));
         ValidatorAgentResponse validation = outputParser.parse(this.chatClient.call(prompt).getResult().getOutput().getContent());
-        assertThat(validation.response()).isEqualTo("no");
-        System.out.println(validation.reason());
+        logger.info("Validation: {}", validation);
+        assertThat(validation.response()).isEqualTo(expected);
     }
-
-    record ValidatorAgentResponse(String response, String reason) {}
 }
