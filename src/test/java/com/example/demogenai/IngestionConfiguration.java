@@ -34,6 +34,7 @@ public class IngestionConfiguration {
                     .withPageExtractedTextFormatter(
                             new ExtractedTextFormatter.Builder().build()
                     )
+                    .withPagesPerDocument(0)
                     .build();
 
             var ollamaJavaDocuments = tokenTextSplitter.apply(new PagePdfDocumentReader(this.ollamaJavaModule, pdfDocumentReaderConfig).get())
