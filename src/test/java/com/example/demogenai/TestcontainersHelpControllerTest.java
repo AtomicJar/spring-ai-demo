@@ -81,7 +81,8 @@ class TestcontainersHelpControllerTest {
         var promptTemplate = new PromptTemplate(this.userPrompt);
         var userMessage = promptTemplate.createMessage(Map.of("question", question, "answer", answer, "reference", reference));
         var prompt = new Prompt(List.of(systemMessage, userMessage));
-        ValidatorAgentResponse validation = outputParser.parse(this.chatClient.call(prompt).getResult().getOutput().getContent());
+        String content = this.chatClient.call(prompt).getResult().getOutput().getContent();
+        ValidatorAgentResponse validation = outputParser.parse(content);
         logger.info("Validation: {}", validation);
         assertThat(validation.response()).isEqualTo(expected);
     }

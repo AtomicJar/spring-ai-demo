@@ -1,1 +1,0 @@
-The following list are the Testcontainers modules available in Go: consul, vault, qdrant

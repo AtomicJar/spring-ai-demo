@@ -18,26 +18,17 @@ public class IngestionConfiguration {
     @Value("classpath:/docs/java-modules.txt")
     private Resource javaModules;
 
-    @Value("classpath:/docs/golang-modules.txt")
-    private Resource goModules;
-
     @Value("classpath:/docs/java-ollama.pdf")
     private Resource ollamaJavaModule;
-
-    @Value("classpath:/docs/go-ollama.pdf")
-    private Resource ollamaGoModule;
 
     @Bean
     ApplicationRunner init(VectorStore vectorStore) {
         return args -> {
             var javaTextReader = new TextReader(this.javaModules);
             javaTextReader.getCustomMetadata().put("language", "java");
-            var goTextReader = new TextReader(this.goModules);
-            goTextReader.getCustomMetadata().put("language", new String[]{"go", "golang"});
 
             var tokenTextSplitter = new TokenTextSplitter();
             var javaDocuments = tokenTextSplitter.apply(javaTextReader.get());
-            var goDocuments = tokenTextSplitter.apply(goTextReader.get());
 
             var pdfDocumentReaderConfig = PdfDocumentReaderConfig.builder()
                     .withPageExtractedTextFormatter(
@@ -55,21 +46,8 @@ public class IngestionConfiguration {
                         return doc;
                     })
                     .toList();
-            var ollamaGoDocuments = tokenTextSplitter.apply(new PagePdfDocumentReader(this.ollamaGoModule, pdfDocumentReaderConfig).get())
-                    .stream()
-                    .map(doc -> {
-                        doc.getMetadata().put("language", new String[]{"go", "golang"});
-                        doc.getMetadata().put("category", "module");
-                        doc.getMetadata().put("project", "testcontainers");
-                        doc.getMetadata().put("module", "ollama");
-                        return doc;
-                    })
-                    .toList();
-
             vectorStore.add(javaDocuments);
-            vectorStore.add(goDocuments);
             vectorStore.add(ollamaJavaDocuments);
-            vectorStore.add(ollamaGoDocuments);
         };
     }
 }

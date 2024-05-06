@@ -40,10 +40,7 @@ public class TestcontainersHelpController {
 
     @GetMapping
     public String help(@RequestParam(value = "message", defaultValue = "Help me with Testcontainers") String message) {
-        var docs = this.vectorStore.similaritySearch(SearchRequest
-                        .query(message)
-                        .withFilterExpression(new FilterExpressionBuilder().eq("language", "java").build())
-                )
+        var docs = this.vectorStore.similaritySearch(SearchRequest.query(message))
                 .stream()
                 .map(Document::getContent)
                 .collect(Collectors.joining(System.lineSeparator()));
