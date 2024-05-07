@@ -11,18 +11,20 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 public class ContainersConfiguration {
 
-    @Bean
-    @ServiceConnection
-    @RestartScope
-    OllamaContainer ollama() {
-        return new OllamaContainer(DockerImageName.parse("ghcr.io/thomasvitale/ollama-llama3:sha-23a050392a24280f642d1b826099ad18d4e0cdf5")
-                .asCompatibleSubstituteFor("ollama/ollama"));
-    }
+	@Bean
+	@ServiceConnection
+	@RestartScope
+	OllamaContainer ollama() {
+		return new OllamaContainer(
+				DockerImageName.parse("ghcr.io/thomasvitale/ollama-llama3:sha-23a050392a24280f642d1b826099ad18d4e0cdf5")
+					.asCompatibleSubstituteFor("ollama/ollama"));
+	}
 
-    @Bean
-    @ServiceConnection
-    @RestartScope
-    QdrantContainer qdrant() {
-        return new QdrantContainer("qdrant/qdrant:v1.9.0");
-    }
+	@Bean
+	@ServiceConnection
+	@RestartScope
+	QdrantContainer qdrant() {
+		return new QdrantContainer("qdrant/qdrant:v1.9.0");
+	}
+
 }

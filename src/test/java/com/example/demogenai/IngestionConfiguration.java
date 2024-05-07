@@ -15,40 +15,40 @@ import org.springframework.core.io.Resource;
 @TestConfiguration(proxyBeanMethods = false)
 public class IngestionConfiguration {
 
-    @Value("classpath:/docs/java-modules.txt")
-    private Resource javaModules;
+	@Value("classpath:/docs/java-modules.txt")
+	private Resource javaModules;
 
-    @Value("classpath:/docs/java-ollama.pdf")
-    private Resource ollamaJavaModule;
+	@Value("classpath:/docs/java-ollama.pdf")
+	private Resource ollamaJavaModule;
 
-    @Bean
-    ApplicationRunner init(VectorStore vectorStore) {
-        return args -> {
-            var javaTextReader = new TextReader(this.javaModules);
-            javaTextReader.getCustomMetadata().put("language", "java");
+	@Bean
+	ApplicationRunner init(VectorStore vectorStore) {
+		return args -> {
+			var javaTextReader = new TextReader(this.javaModules);
+			javaTextReader.getCustomMetadata().put("language", "java");
 
-            var tokenTextSplitter = new TokenTextSplitter();
-            var javaDocuments = tokenTextSplitter.apply(javaTextReader.get());
+			var tokenTextSplitter = new TokenTextSplitter();
+			var javaDocuments = tokenTextSplitter.apply(javaTextReader.get());
 
-            var pdfDocumentReaderConfig = PdfDocumentReaderConfig.builder()
-                    .withPageExtractedTextFormatter(
-                            new ExtractedTextFormatter.Builder().build()
-                    )
-                    .withPagesPerDocument(0)
-                    .build();
+			var pdfDocumentReaderConfig = PdfDocumentReaderConfig.builder()
+				.withPageExtractedTextFormatter(new ExtractedTextFormatter.Builder().build())
+				.withPagesPerDocument(0)
+				.build();
 
-            var ollamaJavaDocuments = tokenTextSplitter.apply(new PagePdfDocumentReader(this.ollamaJavaModule, pdfDocumentReaderConfig).get())
-                    .stream()
-                    .map(doc -> {
-                        doc.getMetadata().put("language", "java");
-                        doc.getMetadata().put("category", "module");
-                        doc.getMetadata().put("project", "testcontainers");
-                        doc.getMetadata().put("module", "ollama");
-                        return doc;
-                    })
-                    .toList();
-            vectorStore.add(javaDocuments);
-            vectorStore.add(ollamaJavaDocuments);
-        };
-    }
+			var ollamaJavaDocuments = tokenTextSplitter
+				.apply(new PagePdfDocumentReader(this.ollamaJavaModule, pdfDocumentReaderConfig).get())
+				.stream()
+				.map(doc -> {
+					doc.getMetadata().put("language", "java");
+					doc.getMetadata().put("category", "module");
+					doc.getMetadata().put("project", "testcontainers");
+					doc.getMetadata().put("module", "ollama");
+					return doc;
+				})
+				.toList();
+			vectorStore.add(javaDocuments);
+			vectorStore.add(ollamaJavaDocuments);
+		};
+	}
+
 }
