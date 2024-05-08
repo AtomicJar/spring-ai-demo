@@ -11,18 +11,4 @@ Follow these instructions:
 - Respond with 'no' if the answer is not clear or concise
 - Respond with 'no' if the answer is not based on the reference
 
-Your response must be a json object with the following structure:
-{
-    "response": "yes",
-    "reason": "The answer is correct because it is based on the reference provided."
-}
-
-### Example
-Question: Is Madrid the capital of Spain?
-Answer: No, it's Barcelona.
-Reference: The capital of Spain is Madrid
-###
-Response: {
-    "response": "no",
-    "reason": "The answer is incorrect because the reference states that the capital of Spain is Madrid."
-}
+{format}
