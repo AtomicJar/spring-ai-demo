@@ -19,13 +19,13 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = { ContainersConfiguration.class, IngestionConfiguration.class, },
+@SpringBootTest(classes = { ContainersConfiguration.class, IngestionConfiguration.class },
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TestcontainersHelpControllerTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestcontainersHelpControllerTest.class);
 
-	@Value("classpath:/validator-agent/system-prompt.txt")
+	@Value("classpath:/validator-agent/system-prompt.st")
 	private Resource systemPrompt;
 
 	@Value("classpath:/validator-agent/user-prompt.st")
@@ -37,7 +37,8 @@ class TestcontainersHelpControllerTest {
 	@Autowired
 	private OllamaChatClient chatClient;
 
-	BeanOutputParser<ValidatorAgentResponse> outputParser = new BeanOutputParser<>(ValidatorAgentResponse.class);
+	private final BeanOutputParser<ValidatorAgentResponse> outputParser = new BeanOutputParser<>(
+			ValidatorAgentResponse.class);
 
 	@Test
 	void contextLoads() {
@@ -73,13 +74,15 @@ class TestcontainersHelpControllerTest {
 	}
 
 	private void evaluation(String question, String answer, String reference, String expected) {
-		var systemMessage = new SystemMessage(this.systemPrompt);
+		var systemPrompt = new PromptTemplate(this.systemPrompt)
+			.create(Map.of("format", this.outputParser.getFormat()));
+		var systemMessage = new SystemMessage(systemPrompt.getContents());
 		var promptTemplate = new PromptTemplate(this.userPrompt);
 		var userMessage = promptTemplate
 			.createMessage(Map.of("question", question, "answer", answer, "reference", reference));
 		var prompt = new Prompt(List.of(systemMessage, userMessage));
 		String content = this.chatClient.call(prompt).getResult().getOutput().getContent();
-		ValidatorAgentResponse validation = outputParser.parse(content);
+		ValidatorAgentResponse validation = this.outputParser.parse(content);
 		logger.info("Validation: {}", validation);
 		assertThat(validation.response()).isEqualTo(expected);
 	}
