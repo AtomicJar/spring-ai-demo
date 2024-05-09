@@ -7,7 +7,7 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.ollama.OllamaChatClient;
-import org.springframework.ai.parser.BeanOutputParser;
+import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,7 +37,7 @@ class TestcontainersHelpControllerTest {
 	@Autowired
 	private OllamaChatClient chatClient;
 
-	private final BeanOutputParser<ValidatorAgentResponse> outputParser = new BeanOutputParser<>(
+	private final BeanOutputConverter<ValidatorAgentResponse> outputParser = new BeanOutputConverter<>(
 			ValidatorAgentResponse.class);
 
 	@Test
