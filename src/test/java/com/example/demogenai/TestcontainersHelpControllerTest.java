@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.ollama.OllamaChatClient;
 import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +35,7 @@ class TestcontainersHelpControllerTest {
 	private TestRestTemplate restTemplate;
 
 	@Autowired
-	private OllamaChatClient chatClient;
+	private OllamaChatModel chatModel;
 
 	private final BeanOutputConverter<ValidatorAgentResponse> outputParser = new BeanOutputConverter<>(
 			ValidatorAgentResponse.class);
@@ -81,7 +81,7 @@ class TestcontainersHelpControllerTest {
 		var userMessage = promptTemplate
 			.createMessage(Map.of("question", question, "answer", answer, "reference", reference));
 		var prompt = new Prompt(List.of(systemMessage, userMessage));
-		String content = this.chatClient.call(prompt).getResult().getOutput().getContent();
+		String content = this.chatModel.call(prompt).getResult().getOutput().getContent();
 		ValidatorAgentResponse validation = this.outputParser.parse(content);
 		logger.info("Validation: {}", validation);
 		assertThat(validation.response()).isEqualTo(expected);

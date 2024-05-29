@@ -4,7 +4,7 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.ollama.OllamaChatClient;
+import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/help")
 public class TestcontainersHelpController {
 
-	private final OllamaChatClient chatClient;
+	private final OllamaChatModel chatModel;
 
 	private final VectorStore vectorStore;
 
@@ -32,8 +32,8 @@ public class TestcontainersHelpController {
 	@Value("classpath:/user-prompt.st")
 	private Resource userPrompt;
 
-	public TestcontainersHelpController(OllamaChatClient chatClient, VectorStore vectorStore) {
-		this.chatClient = chatClient;
+	public TestcontainersHelpController(OllamaChatModel chatModel, VectorStore vectorStore) {
+		this.chatModel = chatModel;
 		this.vectorStore = vectorStore;
 	}
 
@@ -50,7 +50,7 @@ public class TestcontainersHelpController {
 
 		var prompt = new Prompt(List.of(systemMessage, userMessage));
 
-		return this.chatClient.call(prompt).getResult().getOutput().getContent();
+		return this.chatModel.call(prompt).getResult().getOutput().getContent();
 	}
 
 }
