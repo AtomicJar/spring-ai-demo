@@ -2,9 +2,9 @@ package com.example.demogenai;
 
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,9 +17,9 @@ import java.util.Map;
 @RequestMapping("/ai")
 public class ChatController {
 
-	private final OllamaChatModel chatModel;
+	private final ChatModel chatModel;
 
-	public ChatController(OllamaChatModel chatModel) {
+	public ChatController(ChatModel chatModel) {
 		this.chatModel = chatModel;
 	}
 
