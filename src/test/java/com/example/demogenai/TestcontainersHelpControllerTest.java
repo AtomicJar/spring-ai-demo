@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
-import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +35,7 @@ class TestcontainersHelpControllerTest {
 	private TestRestTemplate restTemplate;
 
 	@Autowired
-	private OllamaChatModel chatModel;
+	private ChatModel chatModel;
 
 	private final BeanOutputConverter<ValidatorAgentResponse> outputParser = new BeanOutputConverter<>(
 			ValidatorAgentResponse.class);

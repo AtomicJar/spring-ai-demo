@@ -1,10 +1,10 @@
 package com.example.demogenai;
 
 import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/help")
 public class TestcontainersHelpController {
 
-	private final OllamaChatModel chatModel;
+	private final ChatModel chatModel;
 
 	private final VectorStore vectorStore;
 
@@ -32,7 +32,7 @@ public class TestcontainersHelpController {
 	@Value("classpath:/user-prompt.st")
 	private Resource userPrompt;
 
-	public TestcontainersHelpController(OllamaChatModel chatModel, VectorStore vectorStore) {
+	public TestcontainersHelpController(ChatModel chatModel, VectorStore vectorStore) {
 		this.chatModel = chatModel;
 		this.vectorStore = vectorStore;
 	}
