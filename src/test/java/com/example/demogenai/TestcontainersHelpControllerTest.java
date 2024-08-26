@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +39,7 @@ class TestcontainersHelpControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		this.chatClient = ChatClient.builder(this.chatModel).build();
+		this.chatClient = ChatClient.builder(this.chatModel).defaultSystem(this.systemPrompt).build();
 	}
 
 	private final BeanOutputConverter<ValidatorAgentResponse> outputParser = new BeanOutputConverter<>(
@@ -81,13 +79,12 @@ class TestcontainersHelpControllerTest {
 	}
 
 	private void evaluation(String question, String answer, String reference, String expected) {
-		var systemPrompt = new PromptTemplate(this.systemPrompt)
-			.create(Map.of("format", this.outputParser.getFormat()));
-		var systemMessage = new SystemMessage(systemPrompt.getContents());
-		var promptTemplate = new PromptTemplate(this.userPrompt);
-		var userMessage = promptTemplate
-			.createMessage(Map.of("question", question, "answer", answer, "reference", reference));
-		String content = this.chatClient.prompt().messages(systemMessage, userMessage).call().content();
+		String content = this.chatClient.prompt()
+			.system(prompt -> prompt.param("format", this.outputParser.getFormat()))
+			.user(user -> user.text(this.userPrompt)
+				.params(Map.of("question", question, "answer", answer, "reference", reference)))
+			.call()
+			.content();
 		ValidatorAgentResponse validation = this.outputParser.convert(content);
 		logger.info("Validation: {}", validation);
 		assertThat(validation.response()).isEqualTo(expected);
