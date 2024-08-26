@@ -1,5 +1,2 @@
 QUESTION
 {question}
-
-DOCUMENTS
-{documents}
