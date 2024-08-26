@@ -82,7 +82,7 @@ class TestcontainersHelpControllerTest {
 			.createMessage(Map.of("question", question, "answer", answer, "reference", reference));
 		var prompt = new Prompt(List.of(systemMessage, userMessage));
 		String content = this.chatModel.call(prompt).getResult().getOutput().getContent();
-		ValidatorAgentResponse validation = this.outputParser.parse(content);
+		ValidatorAgentResponse validation = this.outputParser.convert(content);
 		logger.info("Validation: {}", validation);
 		assertThat(validation.response()).isEqualTo(expected);
 	}
