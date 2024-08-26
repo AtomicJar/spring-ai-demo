@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = { ContainersConfiguration.class, IngestionConfiguration.class },
-		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+		properties = { "logging.level.org.springframework.ai.chat.client.advisor=DEBUG" })
 class TestcontainersHelpControllerTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestcontainersHelpControllerTest.class);
@@ -39,7 +41,10 @@ class TestcontainersHelpControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		this.chatClient = ChatClient.builder(this.chatModel).defaultSystem(this.systemPrompt).build();
+		this.chatClient = ChatClient.builder(this.chatModel)
+			.defaultSystem(this.systemPrompt)
+			.defaultAdvisors(new SimpleLoggerAdvisor())
+			.build();
 	}
 
 	private final BeanOutputConverter<ValidatorAgentResponse> outputParser = new BeanOutputConverter<>(
