@@ -16,7 +16,7 @@ public class ContainersConfiguration {
 	@RestartScope
 	OllamaContainer ollama() {
 		return new OllamaContainer(
-				DockerImageName.parse("ghcr.io/thomasvitale/ollama-llama3:sha-23a050392a24280f642d1b826099ad18d4e0cdf5")
+				DockerImageName.parse("ghcr.io/thomasvitale/ollama-llama3:sha-747708c338babbb52c67e913928000ce8f3ed6ec")
 					.asCompatibleSubstituteFor("ollama/ollama"));
 	}
 
