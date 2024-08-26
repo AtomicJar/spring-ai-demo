@@ -1,8 +1,8 @@
 package com.example.demogenai;
 
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/help")
 public class TestcontainersHelpController {
 
-	private final ChatModel chatModel;
+	private final ChatClient chatClient;
 
 	private final VectorStore vectorStore;
 
@@ -33,7 +32,7 @@ public class TestcontainersHelpController {
 	private Resource userPrompt;
 
 	public TestcontainersHelpController(ChatModel chatModel, VectorStore vectorStore) {
-		this.chatModel = chatModel;
+		this.chatClient = ChatClient.builder(chatModel).build();
 		this.vectorStore = vectorStore;
 	}
 
@@ -48,9 +47,7 @@ public class TestcontainersHelpController {
 		var promptTemplate = new PromptTemplate(this.userPrompt);
 		var userMessage = promptTemplate.createMessage(Map.of("question", message, "documents", docs));
 
-		var prompt = new Prompt(List.of(systemMessage, userMessage));
-
-		return this.chatModel.call(prompt).getResult().getOutput().getContent();
+		return this.chatClient.prompt().messages(systemMessage, userMessage).call().content();
 	}
 
 }

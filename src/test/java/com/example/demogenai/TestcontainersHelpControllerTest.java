@@ -1,11 +1,12 @@
 package com.example.demogenai;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.Resource;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,6 +36,13 @@ class TestcontainersHelpControllerTest {
 
 	@Autowired
 	private ChatModel chatModel;
+
+	private ChatClient chatClient;
+
+	@BeforeEach
+	void setUp() {
+		this.chatClient = ChatClient.builder(this.chatModel).build();
+	}
 
 	private final BeanOutputConverter<ValidatorAgentResponse> outputParser = new BeanOutputConverter<>(
 			ValidatorAgentResponse.class);
@@ -80,8 +87,7 @@ class TestcontainersHelpControllerTest {
 		var promptTemplate = new PromptTemplate(this.userPrompt);
 		var userMessage = promptTemplate
 			.createMessage(Map.of("question", question, "answer", answer, "reference", reference));
-		var prompt = new Prompt(List.of(systemMessage, userMessage));
-		String content = this.chatModel.call(prompt).getResult().getOutput().getContent();
+		String content = this.chatClient.prompt().messages(systemMessage, userMessage).call().content();
 		ValidatorAgentResponse validation = this.outputParser.convert(content);
 		logger.info("Validation: {}", validation);
 		assertThat(validation.response()).isEqualTo(expected);
