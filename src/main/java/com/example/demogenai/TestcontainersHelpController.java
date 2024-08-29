@@ -1,7 +1,9 @@
 package com.example.demogenai;
 
+import io.micrometer.core.annotation.Counted;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,10 +26,14 @@ public class TestcontainersHelpController {
 
 	public TestcontainersHelpController(ChatModel chatModel, VectorStore vectorStore,
 			@Value("classpath:/system-prompt.txt") Resource systemPrompt) {
-		this.chatClient = ChatClient.builder(chatModel).defaultSystem(systemPrompt).build();
+		this.chatClient = ChatClient.builder(chatModel)
+			.defaultSystem(systemPrompt)
+			.defaultAdvisors(new SimpleLoggerAdvisor())
+			.build();
 		this.vectorStore = vectorStore;
 	}
 
+	@Counted
 	@GetMapping
 	public String help(@RequestParam(value = "message", defaultValue = "Help me with Testcontainers") String message) {
 		return this.chatClient.prompt()
