@@ -6,7 +6,7 @@ public class TestDemoGenaiApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.from(DemoGenaiApplication::main)
-			.with(ContainersConfiguration.class, IngestionConfiguration.class)
+			.with(ContainersConfiguration.class, GrafanaContainerConfiguration.class, IngestionConfiguration.class)
 			.run(args);
 	}
 
