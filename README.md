@@ -25,4 +25,4 @@ or
 http :8080/help message=="How can I use Testcontainers Ollama in Java?"
 ```
 
-NOTE: If the service is configured in Testcontainers Desktop, you can access to Qdrant dashboard http://localhost:6333/dashboard  
+NOTE: If the service is configured in Testcontainers Desktop, you can access to Qdrant dashboard http://localhost:6333/dashboard and Grafana Dashboard http://localhost:3000/
