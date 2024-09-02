@@ -3,7 +3,7 @@
 ## Prerequisites
 
 * Docker or Testcontainers Desktop
-* Java 17
+* Java 21
 
 ## How to run
 
