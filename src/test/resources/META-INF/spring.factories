@@ -1,2 +1,0 @@
-org.springframework.boot.autoconfigure.service.connection.ConnectionDetailsFactory=\
-com.example.demogenai.OpenTelemetryLoggingContainerConnectionDetailsFactory
