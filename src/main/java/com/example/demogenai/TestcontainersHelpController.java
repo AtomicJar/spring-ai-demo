@@ -5,6 +5,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/help")
@@ -36,8 +40,10 @@ public class TestcontainersHelpController {
 	@Counted
 	@GetMapping
 	public String help(@RequestParam(value = "message", defaultValue = "Help me with Testcontainers") String message) {
+		PromptTemplate promptTemplate = new PromptTemplate(userPrompt);
+		Prompt prompt = promptTemplate.create(Map.of("question", message));
 		return this.chatClient.prompt()
-			.user(prompt -> prompt.text(this.userPrompt).param("question", message))
+			.user(prompt.getContents())
 			.advisors(new QuestionAnswerAdvisor(this.vectorStore))
 			.call()
 			.content();

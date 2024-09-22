@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		properties = { "logging.level.org.springframework.ai.chat.client.advisor=DEBUG" })
 class TestcontainersHelpControllerTest {
 
-	static final String BESPOKE_MINICHECK = "bespoke-minicheck";
+	static final String BESPOKE_MINICHECK = "bespoke-minicheck:7b";
 
 	@Value("classpath:/validator-agent/system-prompt.st")
 	private Resource systemPrompt;
@@ -63,7 +63,6 @@ class TestcontainersHelpControllerTest {
 		var answer = restTemplate.getForObject("/help?message={question}", String.class, question);
 
 		var content = chatResponse(question);
-				;
 		evaluation(answer, content, "Yes");
 	}
 
