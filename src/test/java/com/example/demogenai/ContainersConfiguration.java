@@ -8,24 +8,23 @@ import org.testcontainers.ollama.OllamaContainer;
 import org.testcontainers.qdrant.QdrantContainer;
 import org.testcontainers.utility.DockerImageName;
 
-
 @TestConfiguration(proxyBeanMethods = false)
 public class ContainersConfiguration {
 
-    @Bean
-    @ServiceConnection
-    @RestartScope
-    OllamaContainer ollama() {
-        return new OllamaContainer(DockerImageName.parse("ilopezluna/evaluator-llama3.1:0.3.11-8b")
-				.asCompatibleSubstituteFor("ollama/ollama")) {
-        };
-    }
+	@Bean
+	@ServiceConnection
+	@RestartScope
+	OllamaContainer ollama() {
+		return new OllamaContainer(DockerImageName.parse("ilopezluna/evaluator-llama3.1:0.3.11-8b")
+			.asCompatibleSubstituteFor("ollama/ollama")) {
+		};
+	}
 
-    @Bean
-    @ServiceConnection
-    @RestartScope
-    QdrantContainer qdrant() {
-        return new QdrantContainer("qdrant/qdrant:v1.9.0");
-    }
+	@Bean
+	@ServiceConnection
+	@RestartScope
+	QdrantContainer qdrant() {
+		return new QdrantContainer("qdrant/qdrant:v1.9.0");
+	}
 
 }

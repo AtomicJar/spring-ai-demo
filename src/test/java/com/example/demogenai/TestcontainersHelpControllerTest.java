@@ -82,13 +82,12 @@ class TestcontainersHelpControllerTest {
 			.user(question)
 			.call()
 			.chatResponse();
-		return ((List<Content>) response.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS))
-				.stream()
-				.map(Content::getContent)
-				.filter(Objects::nonNull)
-				.filter(c -> c instanceof String)
-				.map(Objects::toString)
-				.collect(Collectors.joining(System.lineSeparator()));
+		return ((List<Content>) response.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS)).stream()
+			.map(Content::getContent)
+			.filter(Objects::nonNull)
+			.filter(c -> c instanceof String)
+			.map(Objects::toString)
+			.collect(Collectors.joining(System.lineSeparator()));
 	}
 
 	private void evaluation(String answer, String reference, String expected) {
