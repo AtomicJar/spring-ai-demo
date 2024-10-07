@@ -17,7 +17,8 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
@@ -30,8 +31,8 @@ class TestcontainersHelpControllerTest {
 
 	static final String BESPOKE_MINICHECK = "bespoke-minicheck:7b";
 
-	@Autowired
-	private TestRestTemplate restTemplate;
+	@LocalServerPort
+	private int port;
 
 	@Autowired
 	private OllamaApi ollamaApi;
@@ -58,7 +59,7 @@ class TestcontainersHelpControllerTest {
 	@Test
 	void verifyWhichTestcontainersModulesAreAvailableInJava() {
 		var question = "Which Testcontainers modules are available in Java?";
-		var answer = restTemplate.getForObject("/help?message={question}", String.class, question);
+		var answer = retrieveAnswer(question);
 
 		assertFactCheck(question, answer);
 	}
@@ -66,9 +67,14 @@ class TestcontainersHelpControllerTest {
 	@Test
 	void verifyHowToUseTestcontainersOllamaInJava() {
 		var question = "How can I use Testcontainers Ollama in Java?";
-		var answer = restTemplate.getForObject("/help?message={question}", String.class, question);
+		var answer = retrieveAnswer(question);
 
 		assertFactCheck(question, answer);
+	}
+
+	private String retrieveAnswer(String question) {
+		RestClient restClient = RestClient.builder().baseUrl("http://localhost:%d".formatted(this.port)).build();
+		return restClient.get().uri("/help?message={question}", question).retrieve().body(String.class);
 	}
 
 	private void assertFactCheck(String question, String answer) {
