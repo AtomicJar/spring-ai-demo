@@ -84,11 +84,8 @@ class TestcontainersHelpControllerTest {
 	}
 
 	private List<Content> docs(String question) {
-		var response = this.chatClientBuilder.build()
-			.prompt()
-			.advisors(new QuestionAnswerAdvisor(this.vectorStore))
-			.user(question)
-			.call()
+		var response = TestcontainersHelpController
+			.callResponseSpec(this.chatClientBuilder.build(), this.vectorStore, question)
 			.chatResponse();
 		return response.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS);
 	}

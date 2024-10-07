@@ -5,8 +5,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -15,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/help")
 public class TestcontainersHelpController {
@@ -24,9 +20,6 @@ public class TestcontainersHelpController {
 	private final ChatClient chatClient;
 
 	private final VectorStore vectorStore;
-
-	@Value("classpath:/user-prompt.st")
-	private Resource userPrompt;
 
 	public TestcontainersHelpController(ChatModel chatModel, VectorStore vectorStore,
 			@Value("classpath:/system-prompt.txt") Resource systemPrompt) {
@@ -40,13 +33,12 @@ public class TestcontainersHelpController {
 	@Counted
 	@GetMapping
 	public String help(@RequestParam(value = "message", defaultValue = "Help me with Testcontainers") String message) {
-		PromptTemplate promptTemplate = new PromptTemplate(userPrompt);
-		Prompt prompt = promptTemplate.create(Map.of("question", message));
-		return this.chatClient.prompt()
-			.user(prompt.getContents())
-			.advisors(new QuestionAnswerAdvisor(this.vectorStore))
-			.call()
-			.content();
+		return callResponseSpec(this.chatClient, this.vectorStore, message).content();
+	}
+
+	static ChatClient.CallResponseSpec callResponseSpec(ChatClient chatClient, VectorStore vectorStore,
+			String question) {
+		return chatClient.prompt().advisors(new QuestionAnswerAdvisor(vectorStore)).user(question).call();
 	}
 
 }
