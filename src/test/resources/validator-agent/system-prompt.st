@@ -1,2 +1,0 @@
-Document: {document}
-Claim: {claim}

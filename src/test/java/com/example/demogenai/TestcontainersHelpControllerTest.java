@@ -6,22 +6,20 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.evaluation.EvaluationRequest;
+import org.springframework.ai.evaluation.EvaluationResponse;
+import org.springframework.ai.evaluation.FactCheckingEvaluator;
 import org.springframework.ai.model.Content;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaApi;
 import org.springframework.ai.ollama.api.OllamaOptions;
-import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.io.Resource;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,9 +30,6 @@ class TestcontainersHelpControllerTest {
 
 	static final String BESPOKE_MINICHECK = "bespoke-minicheck:7b";
 
-	@Value("classpath:/validator-agent/system-prompt.st")
-	private Resource systemPrompt;
-
 	@Autowired
 	private TestRestTemplate restTemplate;
 
@@ -44,13 +39,16 @@ class TestcontainersHelpControllerTest {
 	@Autowired
 	private VectorStore vectorStore;
 
-	private ChatClient chatClient;
+	@Autowired
+	private ChatClient.Builder chatClientBuilder;
+
+	private ChatClient.Builder factCheckChatClientBuilder;
 
 	@BeforeEach
 	void setUp() {
 		ChatModel chatModel = new OllamaChatModel(ollamaApi,
-				OllamaOptions.builder().withModel(BESPOKE_MINICHECK).withNumPredict(2).withTemperature(0.0f).build());
-		this.chatClient = ChatClient.builder(chatModel).defaultAdvisors(new SimpleLoggerAdvisor()).build();
+				OllamaOptions.builder().withModel(BESPOKE_MINICHECK).withNumPredict(2).withTemperature(0.0d).build());
+		this.factCheckChatClientBuilder = ChatClient.builder(chatModel).defaultAdvisors(new SimpleLoggerAdvisor());
 	}
 
 	@Test
@@ -62,8 +60,7 @@ class TestcontainersHelpControllerTest {
 		var question = "Which Testcontainers modules are available in Java?";
 		var answer = restTemplate.getForObject("/help?message={question}", String.class, question);
 
-		var content = chatResponse(question);
-		evaluation(answer, content, "Yes");
+		assertFactCheck(question, answer);
 	}
 
 	@Test
@@ -71,31 +68,23 @@ class TestcontainersHelpControllerTest {
 		var question = "How can I use Testcontainers Ollama in Java?";
 		var answer = restTemplate.getForObject("/help?message={question}", String.class, question);
 
-		var content = chatResponse(question);
-
-		evaluation(answer, content, "Yes");
+		assertFactCheck(question, answer);
 	}
 
-	private String chatResponse(String question) {
-		var response = this.chatClient.prompt()
-			.advisors(new QuestionAnswerAdvisor(this.vectorStore, SearchRequest.defaults()))
+	private void assertFactCheck(String question, String answer) {
+		FactCheckingEvaluator factCheckingEvaluator = new FactCheckingEvaluator(this.factCheckChatClientBuilder);
+		EvaluationResponse evaluate = factCheckingEvaluator.evaluate(new EvaluationRequest(docs(question), answer));
+		assertThat(evaluate.isPass()).isTrue();
+	}
+
+	private List<Content> docs(String question) {
+		var response = this.chatClientBuilder.build()
+			.prompt()
+			.advisors(new QuestionAnswerAdvisor(this.vectorStore))
 			.user(question)
 			.call()
 			.chatResponse();
-		return ((List<Content>) response.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS)).stream()
-			.map(Content::getContent)
-			.filter(Objects::nonNull)
-			.filter(c -> c instanceof String)
-			.map(Objects::toString)
-			.collect(Collectors.joining(System.lineSeparator()));
-	}
-
-	private void evaluation(String answer, String reference, String expected) {
-		String content = this.chatClient.prompt()
-			.user(prompt -> prompt.text(this.systemPrompt).params(Map.of("document", reference, "claim", answer)))
-			.call()
-			.content();
-		assertThat(content).isEqualTo(expected);
+		return response.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS);
 	}
 
 }
