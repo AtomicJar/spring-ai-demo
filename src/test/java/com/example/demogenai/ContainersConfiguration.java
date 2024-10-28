@@ -15,7 +15,7 @@ public class ContainersConfiguration {
 	@ServiceConnection
 	@RestartScope
 	OllamaContainer ollama() {
-		return new OllamaContainer(DockerImageName.parse("ilopezluna/evaluator-llama3.1:0.3.11-8b")
+		return new OllamaContainer(DockerImageName.parse("ilopezluna/spring-ai-demo-models:llama3.2-1b")
 			.asCompatibleSubstituteFor("ollama/ollama")) {
 		};
 	}
