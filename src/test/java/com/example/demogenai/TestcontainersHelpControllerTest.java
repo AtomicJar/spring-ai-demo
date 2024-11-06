@@ -8,7 +8,7 @@ import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.evaluation.EvaluationRequest;
 import org.springframework.ai.evaluation.EvaluationResponse;
-import org.springframework.ai.evaluation.FactCheckingEvaluator;
+import org.springframework.ai.evaluation.RelevancyEvaluator;
 import org.springframework.ai.model.Content;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaApi;
@@ -29,8 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 		properties = { "logging.level.org.springframework.ai.chat.client.advisor=DEBUG" })
 class TestcontainersHelpControllerTest {
 
-	static final String BESPOKE_MINICHECK = "bespoke-minicheck:7b";
-
 	@LocalServerPort
 	private int port;
 
@@ -48,7 +46,7 @@ class TestcontainersHelpControllerTest {
 	@BeforeEach
 	void setUp() {
 		ChatModel chatModel = new OllamaChatModel(ollamaApi,
-				OllamaOptions.builder().withModel(BESPOKE_MINICHECK).withNumPredict(2).withTemperature(0.0d).build());
+				OllamaOptions.builder().withModel("llama3.2:1b").withNumPredict(2).withTemperature(0.0d).build());
 		this.factCheckChatClientBuilder = ChatClient.builder(chatModel).defaultAdvisors(new SimpleLoggerAdvisor());
 	}
 
@@ -78,7 +76,7 @@ class TestcontainersHelpControllerTest {
 	}
 
 	private void assertFactCheck(String question, String answer) {
-		FactCheckingEvaluator factCheckingEvaluator = new FactCheckingEvaluator(this.factCheckChatClientBuilder);
+		RelevancyEvaluator factCheckingEvaluator = new RelevancyEvaluator(this.factCheckChatClientBuilder);
 		EvaluationResponse evaluate = factCheckingEvaluator.evaluate(new EvaluationRequest(docs(question), answer));
 		assertThat(evaluate.isPass()).isTrue();
 	}
