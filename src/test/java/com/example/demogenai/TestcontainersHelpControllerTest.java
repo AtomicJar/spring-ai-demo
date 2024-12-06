@@ -47,8 +47,14 @@ class TestcontainersHelpControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		ChatModel chatModel = new OllamaChatModel(ollamaApi,
-				OllamaOptions.builder().withModel(BESPOKE_MINICHECK).withNumPredict(2).withTemperature(0.0d).build());
+		ChatModel chatModel = OllamaChatModel.builder()
+			.withOllamaApi(this.ollamaApi)
+			.withDefaultOptions(OllamaOptions.builder()
+				.withModel(BESPOKE_MINICHECK)
+				.withNumPredict(2)
+				.withTemperature(0.0d)
+				.build())
+			.build();
 		this.factCheckChatClientBuilder = ChatClient.builder(chatModel).defaultAdvisors(new SimpleLoggerAdvisor());
 	}
 
