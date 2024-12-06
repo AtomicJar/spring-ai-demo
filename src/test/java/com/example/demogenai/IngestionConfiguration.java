@@ -31,7 +31,7 @@ public class IngestionConfiguration {
 			var javaDocuments = tokenTextSplitter.apply(javaTextReader.get());
 
 			var pdfDocumentReaderConfig = PdfDocumentReaderConfig.builder()
-				.withPageExtractedTextFormatter(new ExtractedTextFormatter.Builder().build())
+				.withPageExtractedTextFormatter(ExtractedTextFormatter.builder().build())
 				.withPagesPerDocument(0)
 				.build();
 
